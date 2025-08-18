@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+    const args = request.nextUrl.pathname.split('/').filter(Boolean);
+    const method = request.method;
+
+    if (method === 'OPTIONS') return new NextResponse(
+        null,
+        {
+            status: 204,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'DELETE'
+            }
+        }
+    );
+
     const unAuthResponse = new NextResponse(null, {
         status: 403,
         headers: { 'Access-Control-Allow-Origin': '*' }
     });
-
-    const args = request.nextUrl.pathname.split('/').filter(Boolean);
-    const method = request.method;
 
     // 检查路由是否有效
     const isValidRoute = (action: string, expectedLength: number, allowedMethods: string[]) => {

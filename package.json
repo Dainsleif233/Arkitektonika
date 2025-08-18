@@ -5,14 +5,31 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm -- migration:generate -d ormconfig.ts",
+    "migration:run": "npm run typeorm -- migration:run -d ormconfig.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d ormconfig.ts"
   },
   "dependencies": {
-    "next": "15.4.6"
+    "@fastify/busboy": "^3.1.1",
+    "client-s3": "github:aws-sdk/client-s3",
+    "dotenv": "^17.2.1",
+    "mysql2": "^3.14.3",
+    "next": "15.4.6",
+    "pg": "^8.16.3",
+    "reflect-metadata": "^0.2.2",
+    "sqlite3": "^5.1.7",
+    "typeorm": "^0.3.25"
   },
   "devDependencies": {
+    "@types/busboy": "^1.5.4",
+    "@types/mysql": "^2.15.27",
     "@types/node": "^20",
+    "@types/pg": "^8.15.5",
     "@types/react": "19.1.10",
+    "@types/sqlite3": "^3.1.11",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }
