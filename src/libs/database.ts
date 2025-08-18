@@ -21,7 +21,7 @@ function getDatabaseConfig(): DatabaseConfig {
         database: process.env.DB_NAME || 'arkitektonika.db',
         synchronize: process.env.NODE_ENV !== 'production',
         logging: process.env.NODE_ENV === 'development'
-    };
+    }
 
     // 如果不是SQLite，需要连接参数
     if (dbType !== 'sqlite') {
