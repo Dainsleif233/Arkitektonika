@@ -36,11 +36,12 @@ export default class {
         }
     }
 
-    async get(key: string, size: number) {
+    async get(key: string, name: string, size: number) {
         if (!(await this.check(key))) return null;
         const commandParams: any = {
             Bucket: process.env.BUCKET_NAME,
-            Key: key
+            Key: key,
+            ResponseContentDisposition: `attachment; filename="${name}"`
         }
 
         const limitRate = Number(process.env.DOWNLOAD_RATE_LIMIT)

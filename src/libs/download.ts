@@ -40,7 +40,7 @@ async function getUrl(downloadKey: string) {
     if (!data) return 404;
 
     const sto = new STO();
-    const url = await sto.get(data.sha1, data.size);
+    const url = await sto.get(data.sha1, data.name, data.size);
     if (!url) return 410;
 
     return url;
