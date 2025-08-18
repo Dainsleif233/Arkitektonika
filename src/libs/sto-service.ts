@@ -1,10 +1,10 @@
 import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-  GetObjectCommand,
-  S3ServiceException,
-  waitUntilObjectNotExists
+    S3Client,
+    PutObjectCommand,
+    DeleteObjectCommand,
+    GetObjectCommand,
+    S3ServiceException,
+    HeadObjectCommand
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -37,6 +37,7 @@ export default class {
     }
 
     async get(key: string, size: number) {
+        if (!(await this.check(key))) return null;
         const commandParams: any = {
             Bucket: process.env.BUCKET_NAME,
             Key: key
@@ -62,7 +63,7 @@ export default class {
     async delete(key: string) {
         const command = new DeleteObjectCommand({
             Bucket: process.env.BUCKET_NAME,
-            Key: key,
+            Key: key
         });
 
         try {
@@ -72,6 +73,20 @@ export default class {
                 `Error from S3 while deleting object. ${e.name}: ${e.message}`,
             );
             else throw e;
+        }
+    }
+
+    async check(key: string) {
+        const command = new HeadObjectCommand({
+            Bucket: process.env.BUCKET_NAME,
+            Key: key
+        });
+
+        try {
+            await this.client.send(command);
+            return true;
+        } catch (e) {
+            return false;
         }
     }
 }

@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import { Schematic } from '@/entities/Arkitektonika';
 
 // 数据库配置接口
 interface DatabaseConfig {
@@ -42,7 +43,7 @@ function getDatabaseConfig(): DatabaseConfig {
 // 创建数据源
 export const AppDataSource = new DataSource({
     ...getDatabaseConfig(),
-    entities: [__dirname + '/../entities/*.{ts,js}'],
+    entities: [Schematic],
     migrations: [__dirname + '/../migrations/*.{ts,js}'],
     subscribers: [__dirname + '/../subscribers/*.{ts,js}'],
     migrationsTableName: 'arkitektonika_migrations',

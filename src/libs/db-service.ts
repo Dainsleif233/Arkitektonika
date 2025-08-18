@@ -12,7 +12,7 @@ export default class {
 
     // 根据哈希获取schematic
     async getByHash(sha1: string) {
-        return this.schematicRepository.findOne({ where: { sha1: sha1, valid: true } });
+        return this.schematicRepository.find({ where: { sha1: sha1, valid: true } });
     }
 
     async getByDownloadKey(key: string) {

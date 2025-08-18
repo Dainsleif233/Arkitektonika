@@ -26,9 +26,12 @@ export async function handleDelete(deleteKey: string) {
     }
 
     const db = new DB();
+    const schems = await db.getByHash(data.sha1 as string);
+    if (schems.length === 1) {
+        const sto = new STO();
+        await sto.delete(data.sha1 as string);
+    }
     await db.disable(deleteKey);
-    const sto = new STO();
-    await sto.delete(data.sha1 as string);
     return new Response(
         null,
         { status: 200 }
@@ -44,8 +47,7 @@ async function getStatus(deleteKey: string) {
     };
 
     const sto = new STO();
-    const url = await sto.get(data.sha1, data.size);
-    if (!url) return {
+    if (!(await sto.check(data.sha1))) return {
         status: 410,
         sha1: data.sha1
     };

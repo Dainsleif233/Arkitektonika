@@ -1,5 +1,3 @@
-import busboy from '@fastify/busboy';
-import { Readable } from 'stream';
 import crypto from 'crypto';
 import DB from '@/libs/db-service';
 import STO from '@/libs/sto-service';
@@ -12,19 +10,21 @@ export async function handleUpload(request: Request) {
         return Response.json({ error: 'Invalid content type' }, { status: 400 });
 
     try {
-        const fileData = await parseMultipartFormData(request);
-        if (!fileData)
+        const file = (await request.formData()).get('schematic') as File | null;
+        if (!file)
             return Response.json({ error: 'Missing file' }, { status: 500 });
+        const sha1 = await getHash(file);
 
-        const { file, sha1 } = fileData;
-        const err = validateFile(file);
-        if (err)
+        const err = await validateFile(file);
+        if (err) {
+            console.error(err);
             return Response.json({ error: `Invalid request due to invalid nbt content: ${err}` }, { status: 413 });
+        }
 
         await initializeDatabase();
         const db = new DB();
         const data = await db.getByHash(sha1);
-        if (!data) {
+        if (data.length < 1) {
             const sto = new STO();
             await sto.put(file, sha1);
         }
@@ -38,80 +38,15 @@ export async function handleUpload(request: Request) {
             { status: 200 }
         );
     } catch (e) {
+        console.error(e);
         return Response.json({ error: 'Failed to parse form data' }, { status: 500 });
     }
 }
 
-interface FileWithHash {
-    file: File;
-    sha1: string;
-}
-
-async function parseMultipartFormData(request: Request): Promise<FileWithHash | null> {
-    return new Promise((resolve, reject) => {
-        const headers: any = {};
-        request.headers.forEach((value, key) => {
-            headers[key] = value;
-        });
-        
-        const bb = busboy({ headers });
-        let fileResult: FileWithHash | null = null;
-
-        bb.on('file', (name, stream, info: any) => {
-            if (name === 'schematic') {
-                const chunks: Buffer[] = [];
-                const hash = crypto.createHash('sha1');
-                
-                stream.on('data', (chunk) => {
-                    chunks.push(chunk);
-                    hash.update(chunk);
-                });
-                
-                stream.on('end', () => {
-                    const buffer = Buffer.concat(chunks);
-                    const sha1 = hash.digest('hex');
-                    const filename = info?.filename || 'unknown';
-                    const mimeType = info?.mimeType || 'application/octet-stream';
-                    const file = new File([buffer], filename, { type: mimeType });
-                    fileResult = { file, sha1 };
-                });
-            } else {
-                stream.resume(); // 忽略其他字段
-            }
-        });
-
-        bb.on('finish', () => {
-            resolve(fileResult);
-        });
-
-        bb.on('error', (err) => {
-            reject(err);
-        });
-
-        // 将Request转换为Node.js可读流
-        if (request.body) {
-            const reader = request.body.getReader();
-            const stream = new Readable({
-                async read() {
-                    const { done, value } = await reader.read();
-                    if (done) {
-                        this.push(null);
-                    } else {
-                        this.push(Buffer.from(value));
-                    }
-                }
-            });
-            stream.pipe(bb);
-        } else {
-            reject(new Error('No request body'));
-        }
-    });
-}
-
-function validateFile(file: File) {
+async function validateFile(file: File) {
     // 1. 检查文件大小是否超过5MB
-    const maxSize = Number(process.env.MAX_SCHEMATIC_SIZE ?? 5 * 1024 * 1024); // 5MB in bytes
-    if (file.size > maxSize) {
+    const maxSize = Number(process.env.MAX_SCHEMATIC_SIZE);
+    if (maxSize > 0 && file.size > maxSize) {
         return `File size exceeds ${maxSize} Bytes limit`;
     }
 
@@ -127,11 +62,22 @@ function validateFile(file: File) {
     }
 
     // 3. 检查是否为gzip压缩包
-    // 通过检查文件的MIME类型或文件头来判断是否为gzip格式
-    if (file.type !== 'application/gzip' && file.type !== 'application/x-gzip') {
+    // 通过检查文件的字节信息（魔数）来判断是否为gzip格式
+    const bytes = new Uint8Array(await file.arrayBuffer());
+
+    // gzip文件的魔数是0x1f 0x8b
+    if (bytes.length < 2 || bytes[0] !== 0x1f || bytes[1] !== 0x8b) {
         return 'File must be in gzip compressed format';
     }
 
     // 所有验证通过，返回null
     return null;
+}
+
+async function getHash(file: File) {
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+    const hash = crypto.createHash('sha1');
+    hash.update(buffer);
+    return hash.digest('hex');
 }
