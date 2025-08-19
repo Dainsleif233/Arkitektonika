@@ -25,8 +25,8 @@
 POST /upload
 Content-Type: multipart/form-data
 
-# 表单字段:
-# schematic: 建筑文件 (.schematic 或 .schem)
+FormData:
+schematic: 建筑文件 (.schematic 或 .schem)
 ```
 
 **响应示例:**
