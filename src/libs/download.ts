@@ -4,44 +4,44 @@ import STO from '@/libs/sto-service';
 
 export async function downloadHead(downloadKey: string) {
     const url = await getUrl(downloadKey);
-    if (url === 404) return new Response(
-        null,
-        { status: 404 }
-    );
-    if (url === 410) return new Response(
-        null,
-        { status: 410 }
-    );
-    
     return new Response(
         null,
-        { status: 200 }
+        { status: url.status }
     );
 }
 
 export async function handleDownload(downloadKey: string) {
     const url = await getUrl(downloadKey);
-    if (url === 404) return new Response(
+    if (url.status === 404) return new Response(
         null,
         { status: 404 }
     );
-    if (url === 410) return new Response(
+    if (url.status === 410) return new Response(
         null,
         { status: 410 }
     );
 
-    return Response.redirect(url, 302);
+    return Response.redirect(url.url as string, 302);
 }
 
 async function getUrl(downloadKey: string) {
     await initializeDatabase();
     const db = new DB();
     const data = await db.getByDownloadKey(downloadKey);
-    if (!data) return 404;
+    if (!data) return {
+        status: 404,
+        url: null
+    };
 
     const sto = new STO();
     const url = await sto.get(data.sha1, data.name, data.size);
-    if (!url) return 410;
+    if (!url) return {
+        status: 410,
+        url: null
+    };
 
-    return url;
+    return {
+        status: 200,
+        url
+    };
 }
