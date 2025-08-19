@@ -1,0 +1,38 @@
+name: Clean Expired Schematics
+
+# 触发条件：定时任务和手动触发
+on:
+  schedule:
+    # 每天凌晨 2 点执行清理任务 (UTC 时间)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    # 允许手动触发工作流
+
+jobs:
+  clean:
+    runs-on: ubuntu-latest
+    
+    # 使用环境变量从 secrets 中获取配置
+    environment: production
+    
+    steps:
+      - name: Clean expired schematics
+        run: |
+          # 向清理端点发送 HEAD 请求
+          curl -X HEAD \
+            -w "HTTP Status: %{http_code}\nResponse Time: %{time_total}s\n" \
+            -s \
+            "${{ secrets.CLEAN_API }}"
+          
+          # 检查请求是否成功
+          if [ $? -eq 0 ]; then
+            echo "✅ 清理任务执行成功"
+          else
+            echo "❌ 清理任务执行失败"
+            exit 1
+          fi
+
+      - name: Log completion
+        run: |
+          echo "🧹 定时清理任务完成于: $(date)"
+          echo "📊 清理了超过 30 天的过期建筑文件"

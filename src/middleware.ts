@@ -33,7 +33,8 @@ export async function middleware(request: NextRequest) {
         if (isValidRoute(undefined, 0, ['GET']) ||
             isValidRoute('upload', 1, ['POST']) ||
             isValidRoute('download', 2, ['HEAD', 'GET']) ||
-            isValidRoute('delete', 2, ['HEAD', 'DELETE'])) {
+            isValidRoute('delete', 2, ['HEAD', 'DELETE']) ||
+            isValidRoute('clean', 2, ['HEAD'])) {
             const nextResponse = NextResponse.next();
             nextResponse.headers.set('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN ?? '*');
             nextResponse.headers.set('X-Api-Version', process.env.npm_package_version as string);
@@ -47,7 +48,8 @@ export async function middleware(request: NextRequest) {
         if (isValidRoute(undefined, 1, ['GET']) ||
             isValidRoute('upload', 2, ['POST']) ||
             isValidRoute('download', 3, ['HEAD', 'GET']) ||
-            isValidRoute('delete', 3, ['HEAD', 'DELETE'])) {
+            isValidRoute('delete', 3, ['HEAD', 'DELETE']) ||
+            isValidRoute('clean', 3, ['HEAD'])) {
             // 重写URL，移除密码前缀，统一为无密码格式传递给后端
             const newUrl = new URL(request.url);
             newUrl.pathname = '/' + args.slice(1).join('/');

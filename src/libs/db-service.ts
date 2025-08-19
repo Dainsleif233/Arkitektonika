@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { Repository, LessThan } from 'typeorm';
 import { AppDataSource } from '@/libs/database';
 import { Schematic } from '@/entities/Arkitektonika';
 import crypto from 'crypto';
@@ -43,5 +43,15 @@ export default class {
             { valid: false }
         );
         return result.affected && result.affected > 0;
+    }
+
+    async queryExpired(time: number) {
+        const timestamp = Math.floor(Date.now() / 1000) - time;
+        return this.schematicRepository.find({
+            where: {
+                timestamp: LessThan(timestamp),
+                valid: true
+            }
+        });
     }
 }
