@@ -14,14 +14,12 @@ jobs:
     
     steps:
       - name: Clean expired schematics
-        env:
-          CLEAN_API_URL: ${{ secrets.CLEAN_API }}
         run: |
           # 向清理端点发送 HEAD 请求
           curl -X HEAD \
             -w "HTTP Status: %{http_code}\nResponse Time: %{time_total}s\n" \
             -s \
-            "$CLEAN_API_URL"
+            "${{ secrets.CLEAN_API }}"
           
           # 检查请求是否成功
           if [ $? -eq 0 ]; then
