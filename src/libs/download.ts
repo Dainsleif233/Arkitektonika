@@ -25,9 +25,6 @@ export async function handleDownload(downloadKey: string) {
 }
 
 async function getUrl(downloadKey: string) {
-    // TODO 
-    // //schematic load schem url:32bde6bf-94e3-4ad1-9f9b-282dca3e80b9
-    // https://schem.intellectualsites.com/fawe/uploads/32bde6bf-94e3-4ad1-9f9b-282dca3e80b9.schem
     const otherApi = JSON.parse(process.env.OTHER_API ?? '{}');
     const matchedKey = Object.keys(otherApi).find(key => downloadKey.endsWith(`@${key}`));
     if (matchedKey) {
@@ -35,7 +32,7 @@ async function getUrl(downloadKey: string) {
         const apiValue = otherApi[matchedKey];
         return {
             status: 200,
-            url: `${apiValue}/${originalKey}`
+            url: `${apiValue}${originalKey}`
         }
     }
 
