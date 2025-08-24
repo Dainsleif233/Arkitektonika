@@ -65,7 +65,7 @@ const nextConfig: NextConfig = {
           value: process.env.ALLOW_ORIGIN ?? '*'
         },
         {
-          key: 'X-API-Version',
+          key: 'X-Api-Version',
           value: packageJson.version
         }
       ]
