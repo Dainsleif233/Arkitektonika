@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import packageJson from './package.json';
 
 const nextConfig: NextConfig = {
   typescript: {
@@ -55,6 +56,21 @@ const nextConfig: NextConfig = {
     }
     return config;
   },
+  headers: async() => {
+    return [{
+      source: '/(.*)',
+      headers: [
+        {
+          key: 'Access-Control-Allow-Origin',
+          value: process.env.ALLOW_ORIGIN ?? '*'
+        },
+        {
+          key: 'X-API-Version',
+          value: packageJson.version
+        }
+      ]
+    }]
+  }
 };
 
 export default nextConfig;

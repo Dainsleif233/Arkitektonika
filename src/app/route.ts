@@ -1,3 +1,5 @@
+import packageJson from '../../package.json';
+
 export async function GET() {
     return Response.json(
         {
@@ -6,7 +8,7 @@ export async function GET() {
                 by: 'SysHub'
             },
             name: 'arkitektonika',
-            version: process.env.npm_package_version
+            version: packageJson.version
         }
     );
 }

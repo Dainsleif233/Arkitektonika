@@ -9,16 +9,12 @@ export async function middleware(request: NextRequest) {
         {
             status: 204,
             headers: {
-                'Access-Control-Allow-Origin': process.env.ALLOW_ORIGIN ?? '*',
                 'Access-Control-Allow-Methods': 'DELETE'
             }
         }
     );
 
-    const unAuthResponse = new NextResponse(null, {
-        status: 403,
-        headers: { 'Access-Control-Allow-Origin': process.env.ALLOW_ORIGIN ?? '*' }
-    });
+    const unAuthResponse = new NextResponse(null, { status: 403 });
 
     // 检查路由是否有效
     const isValidRoute = (action: string|undefined, expectedLength: number, allowedMethods: string[]) => {
@@ -36,8 +32,6 @@ export async function middleware(request: NextRequest) {
             isValidRoute('delete', 2, ['HEAD', 'DELETE', 'GET']) ||
             isValidRoute('clean', 2, ['HEAD', 'GET'])) {
             const nextResponse = NextResponse.next();
-            nextResponse.headers.set('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN ?? '*');
-            nextResponse.headers.set('X-Api-Version', process.env.npm_package_version as string);
             return nextResponse;
         }
         return unAuthResponse;
@@ -54,8 +48,6 @@ export async function middleware(request: NextRequest) {
             const newUrl = new URL(request.url);
             newUrl.pathname = '/' + args.slice(1).join('/');
             const rewriteResponse = NextResponse.rewrite(newUrl);
-            rewriteResponse.headers.set('Access-Control-Allow-Origin', process.env.ALLOW_ORIGIN ?? '*');
-            rewriteResponse.headers.set('X-API-Version', process.env.npm_package_version as string);
             return rewriteResponse;
         }
     }
