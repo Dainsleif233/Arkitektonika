@@ -16,7 +16,7 @@
     "client-s3": "github:aws-sdk/client-s3",
     "dotenv": "^17.2.1",
     "mysql2": "^3.14.3",
-    "next": "15.4.6",
+    "next": "15.4.8",
     "pg": "^8.16.3",
     "sqlite3": "^5.1.7",
     "typeorm": "^0.3.25"
